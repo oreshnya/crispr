@@ -217,6 +217,29 @@ def encode_7channels(dna: str, rna: str, pam_location: str = "last", pam_length:
 
     return combined_matrix
 
+
+def count_mismatches(seq1: str, seq2: str) -> int:
+    """
+    Считает количество несовпадений (миссматчей) между двумя последовательностями нуклеотидов.
+    
+    :param seq1: Первая последовательность (строка).
+    :param seq2: Вторая последовательность (строка).
+    :return: Количество несовпадений (int).
+    """
+    if len(seq1) != len(seq2):
+        raise ValueError("Последовательности должны быть одинаковой длины.")
+    
+    mismatches = sum(1 for a, b in zip(seq1, seq2) if a != b)
+    return mismatches
+
+def calc_gc_content(seq: str) -> float:
+    if not seq:  # на случай, если строка пустая
+        return 0.0
+    seq = seq.upper()  # Для надёжности приводим к верхнему регистру
+    gc_count = sum(ch in ('G', 'C') for ch in seq)
+    return gc_count / len(seq)
+
+
 def add_new_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Добавляет столбцы с новыми признаками:
@@ -269,13 +292,6 @@ def add_new_features(df: pd.DataFrame) -> pd.DataFrame:
     # 4) gc_content
     # ---------------------
     # Считаем долю нуклеотидов G и C в "sgRNA_input"
-    def calc_gc_content(seq: str) -> float:
-        if not seq:  # на случай, если строка пустая
-            return 0.0
-        seq = seq.upper()  # Для надёжности приводим к верхнему регистру
-        gc_count = sum(ch in ('G', 'C') for ch in seq)
-        return gc_count / len(seq)
-
     df['gc_content'] = df['sgRNA_input'].apply(calc_gc_content)
 
     # ---------------------
