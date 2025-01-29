@@ -1,9 +1,44 @@
-## Датасеты
+# Datasets
 ![Датасеты, использованные при обучении CRISPR-BERT](/images/datasets_info.bmp)
+*Datasets used for CRISPR-BERT training*
 
-### K562 and HEKT
-The off-target profile dataset contained two different cell types: 293-related cell lines (18 sgRNAs) and K562 t (12 sgRNAs) [6, 22, 24,25,26,27, 44]. For all 30 sgRNAs, we obtained ~ 160,000 possible loci across the whole genome using bowtie2 [51], with a maximum of six nucleotide mismatches. The whole dataset was highly unbalanced, and nearly 1/250 loci was identified as an off-target site (one mismatch, 4; two mismatches, 31; three mismatches, 121; four mismatches, 236; five mismatches, 174; six mismatches, 75) with various whole genome off-target detection techniques [22,23,24,25,26,27] (Additional files 6 and 7). For the classification model, the off-target sites are labeled as “1” and the others are labeled as “0”. For the regression model, the off-target sites are labeled and normalized with the targeting cleavage frequency (indel frequency) detected by different off-target detection assays. *[Source: [G. Chuai et al. (2018) DeepCRISPR: optimized CRISPR guide RNA design by deep learning](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1459-4)]*
+## K562 and HEK293t
+The off-target profile dataset contained two different cell types: 293-related cell lines (18 sgRNAs) and K562 t (12 sgRNAs) [6, 22, 24,25,26,27, 44]. For all 30 sgRNAs, we obtained ~ 160,000 possible loci across the whole genome using bowtie2 [51], with a maximum of six nucleotide mismatches. The whole dataset was highly unbalanced, and nearly 1/250 loci was identified as an off-target site (one mismatch, 4; two mismatches, 31; three mismatches, 121; four mismatches, 236; five mismatches, 174; six mismatches, 75) with various whole genome off-target detection techniques [22,23,24,25,26,27] (Additional files 6 and 7). For the classification model, the off-target sites are labeled as “1” and the others are labeled as “0”. For the regression model, the off-target sites are labeled and normalized with the targeting cleavage frequency (indel frequency) detected by different off-target detection assays. (*Source: [G. Chuai et al. (2018) DeepCRISPR: optimized CRISPR guide RNA design by deep learning](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1459-4)*)
 
+| target | potential_off_target | is_off_target |
+|----------|----------|----------|
+| AAATGAGAAGAAGAGGCACAGGG | GCATGAGAAGAAGAGACATAGCC | 0 |
+| AAATGAGAAGAAGAGGCACAGGG | GAAGAAGAAGAAGAGGAAGAGGA | 0 |
+| CCTGCCTCCGCTCTACTCACTGG | CCTGGCTCCTCTCTCCTCACTGG | 1 |
+
+*Dataset source: [S.W. Cho et al. (2014) Analysis of off-target effects of CRISPR/Cas-derived RNA-guided endonucleases and nickases](https://pmc.ncbi.nlm.nih.gov/articles/PMC3875854/
+)*
+
+## Table_S8_machine_learning_input
+
+1. *key* - уникальное значение
+2. *perfect_match_sgRNA* - гидРНК, полностью комплементарная таргетному участку ДНК (perfectly matched sgRNA, PMsgRNA)
+3. *gene* - название гена
+4. *sgRNA_sequence* - гидРНК с одним несовпадением к таргетному участку (mismatched sgRNA, MMsgRNA)
+5. *mismatch_position* - позиция несовпадения 
+6. *new_pairing* - содержание несовпадения. Например, *rA:dC*	значит, что нуклеотид G (комплементарный C) в РНК заменен на A.
+7. *K562* - были ли проведены эксперименты на клетках линии K562
+8. *Jurkat* - были ли проведены эксперименты на клетках линии Jurkat
+9. *mean_relative_gamma* - активность MMsgRNA относительно PMsgRNA
+
+*Dataset source: [M. Jost et al. (2020) Titrating gene expression using libraries of systematically attenuated CRISPR guide RNAs](https://pmc.ncbi.nlm.nih.gov/articles/PMC7065968/)*
+
+# Embeddings
+## SeQuant
+[GitHub](https://github.com/GenerativeMolMachines/SeQuant)
+
+
+
+
+
+
+
+-----------------------------------------------------------------------
 
 ## Описание проекта
 
