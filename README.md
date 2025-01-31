@@ -5,6 +5,7 @@
 ## K562 and HEK293t
 The off-target profile dataset contained two different cell types: 293-related cell lines (18 sgRNAs) and K562 t (12 sgRNAs) [6, 22, 24,25,26,27, 44]. For all 30 sgRNAs, we obtained ~ 160,000 possible loci across the whole genome using bowtie2 [51], with a maximum of six nucleotide mismatches. The whole dataset was highly unbalanced, and nearly 1/250 loci was identified as an off-target site (one mismatch, 4; two mismatches, 31; three mismatches, 121; four mismatches, 236; five mismatches, 174; six mismatches, 75) with various whole genome off-target detection techniques [22,23,24,25,26,27] (Additional files 6 and 7). For the classification model, the off-target sites are labeled as “1” and the others are labeled as “0”. For the regression model, the off-target sites are labeled and normalized with the targeting cleavage frequency (indel frequency) detected by different off-target detection assays. (*Source: [G. Chuai et al. (2018) DeepCRISPR: optimized CRISPR guide RNA design by deep learning](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1459-4)*)
 
+Sample of K562 data (20319 rows):
 | target | potential_off_target | is_off_target |
 |----------|----------|----------|
 | AAATGAGAAGAAGAGGCACAGGG | GCATGAGAAGAAGAGACATAGCC | 0 |
@@ -27,6 +28,22 @@ The off-target profile dataset contained two different cell types: 293-related c
 9. *mean_relative_gamma* - активность MMsgRNA относительно PMsgRNA
 
 *Dataset source: [M. Jost et al. (2020) Titrating gene expression using libraries of systematically attenuated CRISPR guide RNAs](https://pmc.ncbi.nlm.nih.gov/articles/PMC7065968/)*
+
+## Data augmented dataset for on-target prediction
+This dataset was generated from ~15,000 sgRNAs across 1071 genes with known knockout efficacies in a data augmentation manner (see the [“On-target data sources”](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1459-4#Sec24) section),
+
+Sample (180513 rows):
+
+| sgRNA | Efficacy | 
+|----------|----------|
+| AAACCGCCTCCAAGTCGCCGAGG | 1 |
+| AAGTGGCTTCCGTGGTGGCCGGG | 0 |
+
+*Dataset source: [G. Chuai et al. (2018) DeepCRISPR: optimized CRISPR guide RNA design by deep learning](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1459-4)*
+
+## The datasets used for the study of sgRNA on-target efficacy prediction
+
+
 
 # Embeddings
 ## SeQuant
