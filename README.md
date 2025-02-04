@@ -29,6 +29,16 @@ Sample of K562 data (20319 rows):
 
 *Dataset source: [M. Jost et al. (2020) Titrating gene expression using libraries of systematically attenuated CRISPR guide RNAs](https://pmc.ncbi.nlm.nih.gov/articles/PMC7065968/)*
 
+## 4 cell lines
+
+Made from the datasets used for the study of sgRNA on-target efficacy prediction. Includes data for four cell lines: *hct116, hek293t, hela, hl60*
+
+Sample (16749 rows):
+| Chromosome | Start | End | Strand | sgRNA | Normalized efficacy | cell_line |
+|----------|----------|----------|----------|----------|----------|----------|
+| chr17 | 33469132 | 33469154 | - | CTTGCTCGCGCAGGACGAGGCGG | 0.16401994504229 | hct116 |
+| chr1 | 12316394 | 12316416 | - | ACTCTCCATGCTCCTGGCCATGG | 0.00942528735632599 | hela |
+
 ## Data augmented dataset for on-target prediction
 This dataset was generated from ~15,000 sgRNAs across 1071 genes with known knockout efficacies in a data augmentation manner (see the [“On-target data sources”](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1459-4#Sec24) section),
 
@@ -40,10 +50,6 @@ Sample (180513 rows):
 | AAGTGGCTTCCGTGGTGGCCGGG | 0 |
 
 *Dataset source: [G. Chuai et al. (2018) DeepCRISPR: optimized CRISPR guide RNA design by deep learning](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1459-4)*
-
-## The datasets used for the study of sgRNA on-target efficacy prediction
-
-
 
 # Embeddings
 ## SeQuant
