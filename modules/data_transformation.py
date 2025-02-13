@@ -1,3 +1,7 @@
+import requests
+import json
+import time
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (mean_squared_error, mean_absolute_error, r2_score,
@@ -303,16 +307,11 @@ def add_new_features(df: pd.DataFrame) -> pd.DataFrame:
     # Берём последние 3 символа из "sgRNA_input" и разворачиваем их
     # Пример: если последовательность заканчивается "GGT", 
     # то pam будет "TGG".
-    
-    def reverse_last_3(seq: str) -> str:
-        if len(seq) < 3:
-            # Если меньше 3 символов, можно вернуть всю строку как есть в "реверсе"
-            return seq[::-1]
-        return seq[-3:][::-1]
 
     df['pam'] = df['sgRNA_input'].apply(reverse_last_3)
 
     return df
+    
 
 
 def generate_embeddings(df, sequence_column, polymer_type='DNA', encoding_strategy='aptamer', batch_size=80):
