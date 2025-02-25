@@ -4,8 +4,6 @@ import time
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import (mean_squared_error, mean_absolute_error, r2_score,
-                             confusion_matrix, precision_score, recall_score, f1_score, fbeta_score)
 
 def validate_raw_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -224,6 +222,51 @@ def encode_7channels(dna: str, rna: str, pam_location: str = "last", pam_length:
     return combined_matrix
 
 
+def encode_7channels_mmrna(dna: str, rna: str) -> np.ndarray:
+    """
+    Кодирует ДНК и РНК последовательности с использованием 7 каналов: A, T, G, C, R, D, F.
+
+    :param dna: ДНК последовательность.
+    :param rna: РНК последовательность.
+    :return: Матрица 7 x N.
+    """
+    if len(dna) != len(rna):
+        raise ValueError("Длина ДНК и РНК последовательностей должна совпадать.")
+
+    # Кодируем последовательности
+    dna_encoded = one_hot_atgc(dna)
+    rna_encoded = one_hot_atgc(rna)
+
+    # ATGC каналы
+    atgc_channels = np.zeros_like(dna_encoded)
+    for i in range(4):
+        match = (dna_encoded[i] == rna_encoded[i]) & (dna_encoded[i] == 1)
+        mismatch = (dna_encoded[i] != rna_encoded[i]) & ((dna_encoded[i] == 1) | (rna_encoded[i] == 1))
+        atgc_channels[i] = mismatch.astype(int) - match.astype(int)
+
+    # R и D каналы
+    r_channel = np.zeros(len(dna), dtype=int)
+    d_channel = np.zeros(len(dna), dtype=int)
+    priority = {"A": 0, "T": 1, "G": 2, "C": 3}
+    for i, (d, r) in enumerate(zip(dna, rna)):
+        if d != r:
+            if priority[d] < priority[r]:
+                d_channel[i] = 1
+            else:
+                r_channel[i] = 1
+
+    # F канал (обозначает PAM-область)
+    f_channel = np.zeros(len(dna), dtype=int)
+    
+    # Устанавливаем 1 для трех символов, начиная с предпоследнего
+    f_channel[-2:-5:-1] = 1
+
+    # Комбинируем все каналы
+    combined_matrix = np.vstack((atgc_channels, r_channel, d_channel, f_channel))
+
+    return combined_matrix
+
+
 def count_mismatches(seq1: str, seq2: str) -> int:
     """
     Считает количество несовпадений (миссматчей) между двумя последовательностями нуклеотидов.
@@ -308,10 +351,27 @@ def add_new_features(df: pd.DataFrame) -> pd.DataFrame:
     # Пример: если последовательность заканчивается "GGT", 
     # то pam будет "TGG".
 
-    df['pam'] = df['sgRNA_input'].apply(reverse_last_3)
+    df['pam'] = df['sgRNA_input'].apply(pam_mmrna)
 
     return df
     
+# def reverse_last_3(seq: str) -> str:
+#     if len(seq) < 3:
+#         # Если меньше 3 символов, можно вернуть всю строку как есть в "реверсе"
+#         return seq[::-1]
+#     return seq[-3:][::-1]
+
+def pam_mmrna(sequence: str) -> str:
+    """
+    Берёт три символа, начиная с предпоследнего, из строки.
+    
+    :param sequence: Входная строка (нуклеотидная последовательность).
+    :return: Подстрока длиной 3 символа.
+    """
+    if len(sequence) < 3:
+        raise ValueError("Строка должна содержать минимум 3 символа.")
+    
+    return sequence[-2:-5:-1][::-1]  # Берём срез и переворачиваем обратно
 
 
 def generate_embeddings(df, sequence_column, polymer_type='DNA', encoding_strategy='aptamer', batch_size=80):
@@ -380,127 +440,3 @@ def generate_embeddings(df, sequence_column, polymer_type='DNA', encoding_strate
     embeddings_df = embeddings_df.reindex(df.index)
 
     return embeddings_df
-
-
-def evaluate_classification_model(model, X_test, y_test, beta=2, threshold=0.5):
-    """
-    Оценивает Keras модель и выводит результаты: accuracy, confusion matrix, precision, recall, F1-score и F-beta score.
-
-    :param model: Keras Model
-    :param X_test: Тестовые данные (массив или список массивов для многовходных моделей)
-    :param y_test: Истинные значения
-    :param beta: Значение beta для F-beta score (по умолчанию 2)
-    :param threshold: Порог классификации (по умолчанию 0.5)
-    :return: Tuple (results_df, annotated_cm)
-    """
-    # Проверка размерностей данных
-    if isinstance(X_test, list):
-        for i, x in enumerate(X_test):
-            if len(x) != len(y_test):
-                raise ValueError(
-                    f"Размер входного массива X_test[{i}] ({len(x)}) не совпадает с размером y_test ({len(y_test)})."
-                )
-    else:
-        if len(X_test) != len(y_test):
-            raise ValueError(
-                f"Размер входного массива X_test ({len(X_test)}) не совпадает с размером y_test ({len(y_test)})."
-            )
-
-    # Оцениваем модель
-    test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=1)
-    print(f"Test Loss: {test_loss:.5f}")
-    print(f"Test Accuracy: {test_accuracy:.5f}")
-
-    # Предсказания вероятностей
-    y_pred_proba = model.predict(X_test)
-
-    # Применяем порог классификации
-    y_pred = (y_pred_proba > threshold).astype(int).flatten()
-
-    # Вычисление метрик
-    precision = precision_score(y_test, y_pred, zero_division=0)
-    recall = recall_score(y_test, y_pred, zero_division=0)
-    f1 = f1_score(y_test, y_pred, zero_division=0)
-    f_beta = fbeta_score(y_test, y_pred, beta=beta, zero_division=0)
-
-    print("\nMetrics:")
-    print(f"Precision: {precision:.5f}")
-    print(f"Recall: {recall:.5f}")
-    print(f"F1-score: {f1:.5f}")
-    print(f"F-beta ({beta}): {f_beta:.5f}")
-    print(f"Threshold used: {threshold}")
-
-    # Создаем DataFrame с результатами
-    results_df = pd.DataFrame({
-        'y_test': y_test,
-        'y_pred_proba': y_pred_proba.flatten(),  # Добавляем вероятности
-        'y_pred': y_pred,
-    })
-    results_df['prediction_is_true'] = results_df.apply(
-        lambda row: 'Yes' if row['y_test'] == row['y_pred'] else 'No',
-        axis=1
-    )
-
-    # Выводим первые строки DataFrame
-    print("\nResults DataFrame (first 5 rows):")
-    print(results_df.head())
-
-    # Confusion matrix
-    cm = confusion_matrix(y_test, y_pred)
-    cm_df = pd.DataFrame(
-        cm, 
-        index=['Actual No (0)', 'Actual Yes (1)'], 
-        columns=['Predicted No (0)', 'Predicted Yes (1)']
-    )
-
-    # Аннотированная confusion matrix
-    annotations = [
-        ['TN (True Negative)', 'FP (False Positive)'],
-        ['FN (False Negative)', 'TP (True Positive)']
-    ]
-    annotated_cm = cm_df.astype(str)
-    for i, row in enumerate(cm_df.index):
-        for j, col in enumerate(cm_df.columns):
-            annotated_cm.loc[row, col] = f"{annotations[i][j]}: {cm[i, j]}"
-
-    # Выводим annotated confusion matrix
-    print("\nAnnotated Confusion Matrix:")
-    print(annotated_cm)
-
-    return results_df, annotated_cm
-
-
-def evaluate_regression_model(model, X_test, y_test):
-    """
-    Оценивает Keras модель для задачи регрессии.
-
-    :param model: Keras Model
-    :param X_test: Тестовые данные
-    :param y_test: Истинные значения
-    :return: results_df (с предсказаниями), метрики (MSE, MAE, R²)
-    """
-    # Оцениваем модель
-    test_loss, test_mae = model.evaluate(X_test, y_test, verbose=1)
-    print(f"Test Loss (MSE): {test_loss:.5f}")
-    print(f"Test MAE: {test_mae:.5f}")
-
-    # Предсказания модели
-    y_pred = model.predict(X_test).flatten()
-
-    # Вычисляем метрики
-    mse = mean_squared_error(y_test, y_pred)
-    mae = mean_absolute_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-
-    print("\nRegression Metrics:")
-    print(f"Mean Squared Error (MSE): {mse:.5f}")
-    print(f"Mean Absolute Error (MAE): {mae:.5f}")
-    print(f"R² Score: {r2:.5f}")
-
-    # Создаем DataFrame с результатами
-    results_df = pd.DataFrame({
-        'y_test': y_test,
-        'y_pred': y_pred
-    })
-
-    return results_df, mse, mae, r2
