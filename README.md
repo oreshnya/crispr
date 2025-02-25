@@ -17,6 +17,7 @@ Sample of K562 data (20319 rows):
 ## Table_S8_machine_learning_input
 
 26248 rows
+The genomic sequence extending from 22 bases 5′ of the beginning of the PAM to 1 base 3′ of the end of the PAM
 
 1. *key* - уникальное значение
 2. *perfect_match_sgRNA* - гидРНК, полностью комплементарная таргетному участку ДНК (perfectly matched sgRNA, PMsgRNA)
