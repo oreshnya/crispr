@@ -1,0 +1,4 @@
+keras-bert==0.89
+keras==2.4.3
+tensorflow-gpu==2.5.0
+scikit-learn==0.24.2

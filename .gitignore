@@ -7,6 +7,7 @@ __pycache__/
 # Игнорировать виртуальное окружение
 venv/
 kanvenv/
+crispr-bert/
 
 reqs_kan.txt
 kan.ipynb
