@@ -12,5 +12,7 @@ crispr-bert/
 reqs_kan.txt
 kan.ipynb
 
-crispr_regression_model.h5
-crispr_regression_model.keras
+data/bert_embeddings.csv
+
+*.h5
+*.keras

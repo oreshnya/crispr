@@ -222,7 +222,7 @@ def encode_7channels(dna: str, rna: str, pam_location: str = "last", pam_length:
     return combined_matrix
 
 
-def encode_7channels_mmrna(dna: str, rna: str) -> np.ndarray:
+def encode_7channels_mmrna_26(dna: str, rna: str) -> np.ndarray:
     """
     Кодирует ДНК и РНК последовательности с использованием 7 каналов: A, T, G, C, R, D, F.
 
@@ -361,7 +361,7 @@ def add_new_features(df: pd.DataFrame) -> pd.DataFrame:
 #         return seq[::-1]
 #     return seq[-3:][::-1]
 
-def pam_mmrna(sequence: str) -> str:
+def pam_mmrna_26(sequence: str) -> str:
     """
     Берёт три символа, начиная с предпоследнего, из строки.
     
@@ -372,6 +372,27 @@ def pam_mmrna(sequence: str) -> str:
         raise ValueError("Строка должна содержать минимум 3 символа.")
     
     return sequence[-2:-5:-1][::-1]  # Берём срез и переворачиваем обратно
+
+def reverse_last_three(s: str) -> str:
+    """
+    Возвращает последние три символа строки в обратном порядке.
+
+    :param s: Входная строка
+    :return: Перевернутая подстрока из последних трех символов
+    """
+    return s[-1:-4:-1] if len(s) >= 3 else s[::-1]  # Если строка короче 3 символов, просто реверсируем всю
+
+
+def dna_to_rna(sequence: str) -> str:
+    """
+    Преобразует последовательность ДНК в РНК по заданным правилам:
+    A -> T, T -> A, G -> U, C -> G.
+
+    :param sequence: строка, содержащая последовательность ДНК (ATGC).
+    :return: строка с преобразованной последовательностью РНК.
+    """
+    mapping = {'A': 'T', 'T': 'A', 'G': 'U', 'C': 'G'}
+    return ''.join(mapping.get(base.upper(), base) for base in sequence)
 
 
 def generate_embeddings(df, sequence_column, polymer_type='DNA', encoding_strategy='aptamer', batch_size=80):
